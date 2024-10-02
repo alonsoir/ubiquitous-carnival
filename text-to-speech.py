@@ -28,7 +28,7 @@ try:
     response = client.audio.speech.create(
         model="tts-1",
         voice="alloy",
-        input="Today is a wonderful day to build something people love!"
+        input="Por favor, no useis esta tecnología para hacer el mal. Gracias."
     )
 
     # Escribir directamente el contenido de la respuesta al archivo
