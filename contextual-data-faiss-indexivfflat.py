@@ -51,16 +51,31 @@ documents = [
     ),
 ]
 
-# Crear embeddings para los documentos
-embeddings = np.array([embeddings_model.embed_query(doc.page_content) for doc in documents]).astype('float32')
+# Crear embeddings para los documentos en lotes
+batch_size = 2
+embeddings = []
 
-# Crear el índice FAISS
-dimension = len(embeddings[0])
-# simple y directo
-faiss_index = faiss.IndexFlatL2(dimension)
+for i in range(0, len(documents), batch_size):
+    batch_docs = documents[i:i + batch_size]
+    batch_embeddings = embeddings_model.embed_documents([doc.page_content for doc in batch_docs])
+    embeddings.extend(batch_embeddings)
+
+# Convertir a un array numpy
+embeddings = np.array(embeddings).astype('float32')
+
+# Crear el índice FAISS usando IndexIVFFlat para optimización
+dimension = len(embeddings[0])  # Dimensiones del vector de embeddings
+
+# Ajustar nlist a un valor menor o igual al número de documentos
+nlist = min(2, len(documents))  # Cambiado a 2 para evitar el warning
+quantizer = faiss.IndexFlatL2(dimension)  # Usar L2 para la distancia
+ivf_index = faiss.IndexIVFFlat(quantizer, dimension, nlist)
+
+# Entrenar el índice con una muestra de los embeddings
+ivf_index.train(embeddings)
 
 # Añadir los embeddings al índice FAISS
-faiss_index.add(embeddings)
+ivf_index.add(embeddings)
 
 # Crear un docstore (almacenamiento de documentos)
 class SimpleDocstore:
@@ -76,7 +91,7 @@ docstore = SimpleDocstore(documents)
 # Crear el vector store usando FAISS
 vector_store = FAISS(
     embedding_function=embeddings_model,
-    index=faiss_index,
+    index=ivf_index,
     docstore=docstore,
     index_to_docstore_id={i: i for i in range(len(documents))}
 )
@@ -86,13 +101,7 @@ query = "¿Qué información contiene el texto extraído?"
 # Realizar la búsqueda (sin filtros en este caso)
 results = vector_store.similarity_search(query)
 
-# Filtrar resultados basados en metadatos (ejemplo: solo documentos de tipo 'PDF')
-filtered_results = [
-    result for result in results
-    if result.metadata.get("document_type") == 'PDF'
-]
-
-# Mostrar resultados filtrados
-for result in filtered_results:
+# Mostrar resultados
+for result in results:
     print(result.page_content)
     print(result.metadata)
