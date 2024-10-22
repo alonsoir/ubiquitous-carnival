@@ -1,0 +1,111 @@
+2024-10-22 10:42:01,723 [INFO] Iniciando investigación sobre: Retrieval-Augmented Generation (RAG) en NLP
+2024-10-22 10:42:06,054 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-22 10:42:06,069 [INFO] Generados 1 analistas
+2024-10-22 10:42:06,070 [INFO] Investigando con analista: Dr. Elena Martínez
+2024-10-22 10:42:06,070 [INFO] Buscando en arxiv: Retrieval-Augmented Generation (RAG) en NLP
+2024-10-22 10:42:06,070 [INFO] Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=Retrieval-Augmented+Generation+%28RAG%29+en+NLP&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=100
+2024-10-22 10:42:07,858 [INFO] Got first page: 100 of 822636 total results
+2024-10-22 10:42:13,551 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-22 10:42:13,553 [INFO] Guardada sección en investigacion/seccion_Dr. Elena Martínez_20241022_104213.md
+2024-10-22 10:42:21,438 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-22 11:17:05,669 [INFO] Iniciando investigación sobre: Retrieval-Augmented Generation (RAG) en NLP
+2024-10-22 11:17:10,692 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-22 11:17:10,705 [INFO] Generados 1 analistas
+2024-10-22 11:17:10,705 [INFO] Investigando con analista: Dr. Elena Martínez
+2024-10-22 11:17:10,705 [INFO] Buscando en arxiv: Retrieval-Augmented Generation (RAG) en NLP
+2024-10-22 11:17:10,706 [INFO] Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=Retrieval-Augmented+Generation+%28RAG%29+en+NLP&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=100
+2024-10-22 11:17:12,198 [INFO] Got first page: 100 of 822636 total results
+2024-10-22 11:17:17,886 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-22 11:17:17,888 [INFO] Guardada sección en investigacion/seccion_Dr. Elena Martínez_20241022_111717.md
+2024-10-22 11:17:25,055 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-22 11:18:29,831 [INFO] Iniciando investigación sobre: Retrieval-Augmented Generation (RAG) en NLP
+2024-10-22 11:18:34,532 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-22 11:18:34,546 [INFO] Generados 1 analistas
+2024-10-22 11:18:34,546 [INFO] Investigando con analista: Dr. Elena Martínez
+2024-10-22 11:18:34,546 [INFO] Buscando en arxiv: Retrieval-Augmented Generation (RAG) en NLP
+2024-10-22 11:18:34,546 [INFO] Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=Retrieval-Augmented+Generation+%28RAG%29+en+NLP&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=100
+2024-10-22 11:18:35,892 [INFO] Got first page: 100 of 822636 total results
+2024-10-22 11:18:41,810 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-22 11:18:41,812 [INFO] Guardada sección en investigacion/seccion_Dr. Elena Martínez_20241022_111841.md
+2024-10-22 11:18:49,583 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-10-22 13:30:11,926 [INFO] Iniciando investigación sobre: Natural Language Processing
+2024-10-22 13:30:11,927 [INFO] Buscando analistas reales para el tema: Natural Language Processing
+2024-10-22 13:30:12,381 [INFO] Generados 3 analistas
+2024-10-22 13:31:08,895 [INFO] Iniciando investigación sobre: Procesamiento de Lenguaje Natural
+2024-10-22 13:31:08,895 [INFO] Buscando analistas reales para el tema: Procesamiento de Lenguaje Natural
+2024-10-22 13:31:10,637 [WARNING] No se encontraron analistas en Scholar para este tema.
+2024-10-22 13:31:10,637 [INFO] Generados 0 analistas
+2024-10-22 13:33:05,621 [INFO] Iniciando investigación sobre: Natural Language Processing
+2024-10-22 13:33:05,621 [INFO] Buscando analistas reales para el tema: Natural Language Processing
+2024-10-22 13:33:05,731 [INFO] Generados 3 analistas
+2024-10-22 13:43:26,198 [INFO] Iniciando investigación sobre: Natural Language Processing
+2024-10-22 13:43:26,198 [INFO] Buscando analistas reales para el tema: Natural Language Processing
+2024-10-22 13:43:26,344 [INFO] Generados 3 analistas
+2024-10-22 13:48:18,685 [INFO] Iniciando investigación sobre: Natural Language Processing
+2024-10-22 13:48:18,685 [INFO] Buscando analistas reales para el tema: Natural Language Processing
+2024-10-22 13:48:18,770 [INFO] Generados 3 analistas
+2024-10-22 13:48:18,771 [INFO] Realizando investigación para: Nigel Collier
+2024-10-22 13:48:18,771 [INFO] Buscando en arxiv: Natural Language Processing
+2024-10-22 13:48:18,771 [INFO] Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=Natural+Language+Processing&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=100
+2024-10-22 13:48:22,459 [INFO] Got first page: 100 of 644045 total results
+2024-10-22 13:48:22,460 [INFO] Guardada sección en investigacion/seccion_Nigel Collier_20241022_134822.md
+2024-10-22 13:48:22,460 [INFO] Realizando investigación para: Siegfried Handschuh
+2024-10-22 13:48:22,460 [INFO] Buscando en arxiv: Natural Language Processing
+2024-10-22 13:48:22,460 [INFO] Sleeping: 2.920789 seconds
+2024-10-22 13:48:25,382 [INFO] Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=Natural+Language+Processing&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=100
+2024-10-22 13:48:26,405 [INFO] Got first page: 100 of 644045 total results
+2024-10-22 13:48:26,406 [INFO] Guardada sección en investigacion/seccion_Siegfried Handschuh_20241022_134826.md
+2024-10-22 13:48:26,407 [INFO] Realizando investigación para: Martin Krallinger
+2024-10-22 13:48:26,407 [INFO] Buscando en arxiv: Natural Language Processing
+2024-10-22 13:48:26,407 [INFO] Sleeping: 2.931128 seconds
+2024-10-22 13:48:29,341 [INFO] Requesting page (first: True, try: 0): https://export.arxiv.org/api/query?search_query=Natural+Language+Processing&id_list=&sortBy=relevance&sortOrder=descending&start=0&max_results=100
+2024-10-22 13:48:33,732 [INFO] Got first page: 100 of 644045 total results
+2024-10-22 13:48:33,733 [INFO] Guardada sección en investigacion/seccion_Martin Krallinger_20241022_134833.md
+2024-10-22 13:59:33,518 [INFO] Iniciando investigación sobre: Natural Language Processing
+2024-10-22 13:59:33,518 [INFO] Buscando analistas reales para el tema: Natural Language Processing
+2024-10-22 14:01:53,469 [INFO] Iniciando investigación sobre: Natural Language Processing
+2024-10-22 14:01:53,469 [INFO] Buscando analistas reales para el tema: Natural Language Processing
+2024-10-22 14:01:53,553 [INFO] Generados 5 analistas
+2024-10-22 14:01:53,553 [INFO] Buscando en web: Natural Language Processing
+2024-10-22 14:01:55,081 [INFO] Buscando en wikipedia: Natural Language Processing
+2024-10-22 14:01:55,323 [INFO] Buscando en linkedin: Natural Language Processing
+2024-10-22 14:01:55,572 [INFO] Buscando en web: Natural Language Processing
+2024-10-22 14:01:55,647 [INFO] Buscando en wikipedia: Natural Language Processing
+2024-10-22 14:01:55,832 [INFO] Buscando en linkedin: Natural Language Processing
+2024-10-22 14:01:56,059 [INFO] Buscando en web: Natural Language Processing
+2024-10-22 14:01:56,136 [INFO] Buscando en wikipedia: Natural Language Processing
+2024-10-22 14:01:56,311 [INFO] Buscando en linkedin: Natural Language Processing
+2024-10-22 14:01:56,551 [INFO] Buscando en web: Natural Language Processing
+2024-10-22 14:01:56,638 [INFO] Buscando en wikipedia: Natural Language Processing
+2024-10-22 14:01:56,839 [INFO] Buscando en linkedin: Natural Language Processing
+2024-10-22 14:01:57,080 [INFO] Buscando en web: Natural Language Processing
+2024-10-22 14:01:57,185 [INFO] Buscando en wikipedia: Natural Language Processing
+2024-10-22 14:01:57,382 [INFO] Buscando en linkedin: Natural Language Processing
+2024-10-22 14:07:46,245 [INFO] Iniciando investigación sobre: Natural Language Processing
+2024-10-22 14:07:46,245 [INFO] Buscando analistas reales para el tema: Natural Language Processing
+2024-10-22 14:07:46,342 [INFO] Generados 5 analistas
+2024-10-22 14:07:46,343 [INFO] Buscando en web: Natural Language Processing
+2024-10-22 14:07:46,421 [INFO] Buscando en wikipedia: Natural Language Processing
+2024-10-22 14:07:46,611 [INFO] Buscando en linkedin: Natural Language Processing
+2024-10-22 14:07:46,788 [INFO] Buscando en arxiv: Natural Language Processing
+2024-10-22 14:07:47,013 [INFO] Archivo .md generado para Nigel Collier: Nigel_Collier_resumen.md
+2024-10-22 14:07:47,013 [INFO] Buscando en web: Natural Language Processing
+2024-10-22 14:07:47,229 [INFO] Buscando en wikipedia: Natural Language Processing
+2024-10-22 14:07:47,554 [INFO] Buscando en linkedin: Natural Language Processing
+2024-10-22 14:07:47,745 [INFO] Buscando en arxiv: Natural Language Processing
+2024-10-22 14:07:48,200 [INFO] Archivo .md generado para Siegfried Handschuh: Siegfried_Handschuh_resumen.md
+2024-10-22 14:07:48,200 [INFO] Buscando en web: Natural Language Processing
+2024-10-22 14:07:48,273 [INFO] Buscando en wikipedia: Natural Language Processing
+2024-10-22 14:07:48,491 [INFO] Buscando en linkedin: Natural Language Processing
+2024-10-22 14:07:48,709 [INFO] Buscando en arxiv: Natural Language Processing
+2024-10-22 14:07:48,941 [INFO] Archivo .md generado para Martin Krallinger: Martin_Krallinger_resumen.md
+2024-10-22 14:07:48,941 [INFO] Buscando en web: Natural Language Processing
+2024-10-22 14:07:49,045 [INFO] Buscando en wikipedia: Natural Language Processing
+2024-10-22 14:07:49,226 [INFO] Buscando en linkedin: Natural Language Processing
+2024-10-22 14:07:49,448 [INFO] Buscando en arxiv: Natural Language Processing
+2024-10-22 14:07:49,674 [INFO] Archivo .md generado para Mikko Kurimo: Mikko_Kurimo_resumen.md
+2024-10-22 14:07:49,674 [INFO] Buscando en web: Natural Language Processing
+2024-10-22 14:07:49,767 [INFO] Buscando en wikipedia: Natural Language Processing
+2024-10-22 14:07:49,967 [INFO] Buscando en linkedin: Natural Language Processing
+2024-10-22 14:07:50,175 [INFO] Buscando en arxiv: Natural Language Processing
+2024-10-22 14:07:50,385 [INFO] Archivo .md generado para Monojit Choudhury: Monojit_Choudhury_resumen.md
