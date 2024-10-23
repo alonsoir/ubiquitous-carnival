@@ -50,7 +50,7 @@ def obtener_analistas_de_scholar(query: str, api_key: str, max_analistas: int = 
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    api_key = "368980b77ba0e570d2574b8a156677845246adad8182340c463f2c6293ea17c8"
+    api_key = "YOUR_SERPAPI_KEY"
     tema = "Natural Language Processing"
 
     analistas = obtener_analistas_de_scholar(tema, api_key)
