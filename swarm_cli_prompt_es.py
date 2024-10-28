@@ -1,189 +1,238 @@
 import os
 import requests
-from swarm import Agent
-from swarm import Swarm
+from typing import Optional, List, Dict
+from dataclasses import dataclass
+from swarm import Agent, Swarm
 from dotenv import load_dotenv
 from datetime import datetime
+from pathlib import Path
+import logging
+from logging.handlers import RotatingFileHandler
+from abc import ABC, abstractmethod
+import urllib.parse  # Para codificar el query
 
-load_dotenv()
+# Crear el directorio de logs si no existe
+log_dir = Path("logs")
+log_dir.mkdir(exist_ok=True)
 
-swarm_client = Swarm()
+# Configuración del logging
+def setup_logging():
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    
+    # Formato para los logs
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # Handler para archivo
+    log_file = log_dir / f"news_aggregator_{datetime.now().strftime('%Y%m%d')}.log"
+    file_handler = RotatingFileHandler(
+        log_file,
+        maxBytes=10485760,  # 10MB
+        backupCount=5,
+        encoding='utf-8'
+    )
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    
+    # Handler para consola
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    
+    return logger
 
-# Función para obtener la fecha actual en formato deseado
-def get_current_date():
-    return datetime.now().strftime("%d-%m-%Y")  # Formato: "28-10-2024"
+logger = setup_logging()
 
-# Solicitar al usuario la ciudad deseada
-local_city = input("Introduce la ciudad para el noticiero (por defecto es Madrid): ") or "Madrid"
+@dataclass
+class NewsArticle:
+    title: str
+    snippet: str
+    source: str
+    
+@dataclass
+class WeatherInfo:
+    temperature: float
+    description: str
+    region: str
 
-# Contexto local con fecha y ubicación automática
-local_context = {
-    "local_context": local_city,
-    "todays_date": get_current_date()
-}
+class NewsService:
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        
+    def fetch_news(self, query: str, limit: int = 5) -> List[NewsArticle]:
+        """Obtiene noticias desde SerpAPI con manejo de errores mejorado"""
+        try:
+            encoded_query = urllib.parse.quote(query)  # Codificar query para URL
+            url = (
+                "https://serpapi.com/search.json"
+                f"?q={encoded_query}&api_key={self.api_key}&hl=es&gl=es"
+            )
+            logger.info(f"Generated query URL: {url}")
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            
+            articles = response.json().get("news_results", [])
+            logger.debug(f"Fetched {len(articles)} articles for query: {query}")
+            return [
+                NewsArticle(
+                    title=article['title'],
+                    snippet=article['snippet'],
+                    source=article.get('source', 'Desconocido')
+                )
+                for article in articles[:limit]
+            ]
+        except requests.RequestException as e:
+            logger.error(f"Error fetching news: {str(e)}", exc_info=True)
+            return []
 
-def fetch_google_news(query):
-    """Función para obtener noticias de SerpAPI"""
-    api_key = os.getenv("SERPAPI_KEY")  # Asegúrate de tener tu clave API para SerpAPI
-    url = f"https://serpapi.com/search.json?q={query}&api_key={api_key}&hl=es&gl=es"
+class WeatherService:
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        
+    def get_weather(self, region: str) -> Optional[WeatherInfo]:
+        """Obtiene información del clima con manejo de errores mejorado"""
+        try:
+            url = (
+                "http://api.openweathermap.org/data/2.5/weather"
+                f"?q={region}&appid={self.api_key}&units=metric"
+            )
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            
+            data = response.json()
+            logger.debug(f"Fetched weather data for region: {region}")
+            return WeatherInfo(
+                temperature=data['main']['temp'],
+                description=data['weather'][0]['description'],
+                region=region
+            )
+        except requests.RequestException as e:
+            logger.error(f"Error fetching weather: {str(e)}", exc_info=True)
+            return None
 
-    response = requests.get(url)
-    if response.status_code == 200:
-        articles = response.json().get("news_results", [])
-        if articles:
-            return "\n".join([f"{article['title']} - {article['snippet']}" for article in articles[:5]])  # Obtener los primeros 5 artículos
-        else:
+class BaseNewsAgent(Agent):
+    def __init__(self, name: str, instructions: str):
+        super().__init__(name=name, instructions=instructions, functions=[self.fetch_news])
+        logger.debug(f"Initialized {name} agent")
+
+    def fetch_news(self, query: str, news_service: NewsService) -> str:
+        logger.info(f"Executing query: '{query}'")
+        articles = news_service.fetch_news(query)
+        if not articles:
             return "No se encontraron noticias."
-    else:
-        return "No se pudo obtener la información de noticias."
-
-def weather_tool(region: str):
-    """Llama a esta herramienta cuando necesites saber sobre el clima en una región específica"""
-    api_key = os.getenv("WEATHER_API_KEY")
-    response = requests.get(f"http://api.openweathermap.org/data/2.5/weather?q={region}&appid={api_key}&units=metric")
-    
-    if response.status_code == 200:
-        data = response.json()
-        temperature = data['main']['temp']
-        weather_description = data['weather'][0]['description']
-        return f"El clima en {region} es de {temperature} grados C, con {weather_description}."
-    else:
-        return "No se pudo obtener la información del clima."
-
-# Definición de agentes para cada sección de noticias
-class LocalNewsAgent(Agent):
-    def __init__(self):
-        super().__init__(
-            name="Agente de Noticias Locales",
-            instructions="Proporciona las últimas noticias locales.",
-            functions=[fetch_google_news]
+            
+        return "\n\n".join(
+            f"**{article.title}**\n{article.snippet}\n*Fuente: {article.source}*"
+            for article in articles
         )
 
-class InternationalNewsAgent(Agent):
+class LocalNewsAgent(BaseNewsAgent):
     def __init__(self):
-        super().__init__(
-            name="Agente de Noticias Internacionales",
-            instructions="Proporciona un resumen de las principales noticias internacionales.",
-            functions=[fetch_google_news]
-        )
+        super().__init__(name="Local News Agent", instructions="Fetch local news")
 
-class BusinessNewsAgent(Agent):
+class InternationalNewsAgent(BaseNewsAgent):
     def __init__(self):
-        super().__init__(
-            name="Agente de Noticias de Negocios",
-            instructions="Comenta sobre las últimas novedades en el ámbito empresarial.",
-            functions=[fetch_google_news]
-        )
+        super().__init__(name="International News Agent", instructions="Fetch international news")
 
-class TechnologyNewsAgent(Agent):
+class BusinessNewsAgent(BaseNewsAgent):
     def __init__(self):
-        super().__init__(
-            name="Agente de Noticias de Tecnología",
-            instructions="Habla sobre los avances y noticias en tecnología.",
-            functions=[fetch_google_news]
-        )
+        super().__init__(name="Business News Agent", instructions="Fetch business news")
 
-class SportsNewsAgent(Agent):
+class TechnologyNewsAgent(BaseNewsAgent):
     def __init__(self):
-        super().__init__(
-            name="Agente de Noticias Deportivas",
-            instructions="Informa sobre los eventos deportivos recientes.",
-            functions=[fetch_google_news]
-        )
+        super().__init__(name="Technology News Agent", instructions="Fetch technology news")
 
-class WeatherAgent(Agent):
+class SportsNewsAgent(BaseNewsAgent):
     def __init__(self):
-        super().__init__(
-            name="Agente del Tiempo",
-            instructions="Proporciona información sobre el clima local.",
-            functions=[weather_tool]
-        )
+        super().__init__(name="Sports News Agent", instructions="Fetch sports news")
 
-# Generación del archivo .md y salida en pantalla
-def generate_markdown_file(content):
-    filename = f"news-{local_city}-{get_current_date()}.md"
-    with open(filename, 'w', encoding='utf-8') as f:
-        f.write(content)
-        print(f"Archivo {filename} generado exitosamente.")
+class NewsAggregator:
+    def __init__(self, city: str):
+        load_dotenv()
+        logger.info(f"Initializing NewsAggregator for city: {city}")
+        
+        serpapi_key = os.getenv("SERPAPI_KEY")
+        weather_api_key = os.getenv("WEATHER_API_KEY")
+        
+        if not serpapi_key or not weather_api_key:
+            logger.error("Missing required API keys in environment variables")
+            raise ValueError("Missing required API keys")
+        
+        self.city = city
+        self.news_service = NewsService(serpapi_key)
+        self.weather_service = WeatherService(weather_api_key)
+        
+        # Inicializar agentes sin guardar news_service en el objeto del agente
+        self.agents = {
+            "locales": LocalNewsAgent(),
+            "internacionales": InternationalNewsAgent(),
+            "negocios": BusinessNewsAgent(),
+            "tecnología": TechnologyNewsAgent(),
+            "deportes": SportsNewsAgent()
+        }
+        logger.debug("All news agents initialized successfully")
 
-# Bucle principal para la transmisión
-def main_loop():
-    news_content = ""
-    
-    # Inicializar agentes
-    local_agent = LocalNewsAgent()
-    international_agent = InternationalNewsAgent()
-    business_agent = BusinessNewsAgent()
-    technology_agent = TechnologyNewsAgent()
-    sports_agent = SportsNewsAgent()
-    weather_agent = WeatherAgent()
+    def generate_report(self) -> str:
+        """Genera el reporte de noticias completo"""
+        logger.info(f"Generating report for {self.city}")
+        sections = []
+        
+        # Obtener clima
+        weather = self.weather_service.get_weather(self.city)
+        if weather:
+            sections.append(
+                f"# Clima\n"
+                f"El clima en {weather.region} es de {weather.temperature:.1f}°C, "
+                f"con {weather.description}.\n"
+            )
+            logger.info(f"Weather information added for {self.city}")
+        else:
+            logger.warning(f"Could not get weather information for {self.city}")
+        
+        # Obtener noticias por sección
+        for section_name, agent in self.agents.items():
+            try:
+                query = f"noticias {section_name} en {self.city}"
+                logger.info(f"Fetching news for section: {section_name}")
+                content = agent.fetch_news(query, news_service=self.news_service)
+                sections.append(f"# Noticias {section_name.title()}\n{content}\n")
+                logger.info(f"Successfully added content for section: {section_name}")
+            except Exception as e:
+                logger.error(f"Error getting {section_name} news: {str(e)}", exc_info=True)
+                sections.append(f"# Noticias {section_name.title()}\n"
+                              f"No se pudieron obtener las noticias.\n")
+        
+        return "\n".join(sections)
+        
+    def save_report(self, content: str) -> Path:
+        """Guarda el reporte en un archivo markdown"""
+        date = datetime.now().strftime("%d-%m-%Y")
+        filename = Path(f"news-{self.city}-{date}.md")
+        
+        try:
+            filename.write_text(content, encoding='utf-8')
+            logger.info(f"Report saved successfully to {filename}")
+            return filename
+        except IOError as e:
+            logger.error(f"Error saving report: {str(e)}", exc_info=True)
+            raise
 
-    # Noticias Locales
-    news_content += "# Noticias Locales\n"
+def main():
     try:
-        local_news_query = f"noticias locales en {local_city}"
-        local_news_result = local_agent.run(messages=[{"role": "user", "content": local_news_query}])
-        news_content += local_news_result + "\n\n"
-        print(f"# Noticias Locales\n{local_news_result}\n")
+        logger.info("Starting news aggregator application")
+        city = input("Introduce la ciudad para el noticiero (por defecto es Madrid): ").strip() or "Madrid"
+        logger.info(f"User selected city: {city}")
+        
+        aggregator = NewsAggregator(city)
+        content = aggregator.generate_report()
+        aggregator.save_report(content)
+        print(content)
+        logger.info("Application completed successfully")
     except Exception as e:
-        news_content += "No se pudo obtener noticias locales.\n\n"
-        print("No se pudo obtener noticias locales.\n")
-
-    # Noticias Internacionales
-    news_content += "# Noticias Internacionales\n"
-    try:
-        international_news_query = f"noticias internacionales sobre {local_city}"
-        international_news_result = international_agent.run(messages=[{"role": "user", "content": international_news_query}])
-        news_content += international_news_result + "\n\n"
-        print(f"# Noticias Internacionales\n{international_news_result}\n")
-    except Exception as e:
-        news_content += "No se pudo obtener noticias internacionales.\n\n"
-        print("No se pudo obtener noticias internacionales.\n")
-
-    # Noticias de Negocios
-    news_content += "# Noticias de Negocios\n"
-    try:
-        business_news_query = f"noticias de negocios en {local_city}"
-        business_news_result = business_agent.run(messages=[{"role": "user", "content": business_news_query}])
-        news_content += business_news_result + "\n\n"
-        print(f"# Noticias de Negocios\n{business_news_result}\n")
-    except Exception as e:
-        news_content += "No se pudo obtener noticias de negocios.\n\n"
-        print("No se pudo obtener noticias de negocios.\n")
-
-    # Noticias de Tecnología
-    news_content += "# Noticias de Tecnología\n"
-    try:
-        technology_news_query = f"noticias de tecnología en {local_city}"
-        technology_news_result = technology_agent.run(messages=[{"role": "user", "content": technology_news_query}])
-        news_content += technology_news_result + "\n\n"
-        print(f"# Noticias de Tecnología\n{technology_news_result}\n")
-    except Exception as e:
-        news_content += "No se pudo obtener noticias de tecnología.\n\n"
-        print("No se pudo obtener noticias de tecnología.\n")
-
-    # Noticias Deportivas
-    news_content += "# Noticias Deportivas\n"
-    try:
-        sports_news_query = f"noticias deportivas en {local_city}"
-        sports_news_result = sports_agent.run(messages=[{"role": "user", "content": sports_news_query}])
-        news_content += sports_news_result + "\n\n"
-        print(f"# Noticias Deportivas\n{sports_news_result}\n")
-    except Exception as e:
-        news_content += "No se pudo obtener noticias deportivas.\n\n"
-        print("No se pudo obtener noticias deportivas.\n")
-
-    # Clima
-    news_content += "# Clima\n"
-    try:
-        weather_info = weather_agent.run(messages=[{"role": "user", "content": f"¿Cuál es el clima en {local_city}?"}])
-        news_content += weather_info + "\n\n"
-        print(f"# Clima\n{weather_info}\n")
-    except Exception as e:
-        news_content += "No se pudo obtener información del clima.\n\n"
-        print("No se pudo obtener información del clima.\n")
-
-    generate_markdown_file(news_content)
+        logger.error(f"Error in main execution: {str(e)}", exc_info=True)
+        print("Ocurrió un error al generar el reporte. Revise los logs para más detalles.")
 
 if __name__ == "__main__":
-    main_loop()
+    main()
