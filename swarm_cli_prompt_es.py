@@ -50,6 +50,9 @@ class NewsArticle:
     title: str
     snippet: str
     source: str
+    link : str
+    displayed_link : str
+    favicon : str
     
 @dataclass
 class WeatherInfo:
@@ -58,33 +61,40 @@ class WeatherInfo:
     region: str
 
 class NewsService:
-    def __init__(self, api_key: str):
+    def __init__(self, api_key):
         self.api_key = api_key
-        
-    def fetch_news(self, query: str, limit: int = 5) -> List[NewsArticle]:
-        """Obtiene noticias desde SerpAPI con manejo de errores mejorado"""
+
+    def fetch_news(self, query, limit=5):
         try:
-            encoded_query = urllib.parse.quote(query)  # Codificar query para URL
-            url = (
-                "https://serpapi.com/search.json"
-                f"?q={encoded_query}&api_key={self.api_key}&hl=es&gl=es"
+            response = requests.get(
+                "https://serpapi.com/search",
+                params={
+                    "q": query,
+                    "location": "Badajoz, Spain",
+                    "hl": "es",
+                    "gl": "es",
+                    "api_key": self.api_key
+                }
             )
-            logger.info(f"Generated query URL: {url}")
-            response = requests.get(url, timeout=10)
             response.raise_for_status()
-            
-            articles = response.json().get("news_results", [])
+
+            articles = response.json().get("organic_results", [])
             logger.debug(f"Fetched {len(articles)} articles for query: {query}")
+
             return [
                 NewsArticle(
-                    title=article['title'],
-                    snippet=article['snippet'],
-                    source=article.get('source', 'Desconocido')
+                    title=article.get("title", "Sin título"),
+                    snippet=article.get("snippet", "Sin descripción"),
+                    source=article.get("source", "Desconocido"),
+                    link=article.get("link"),
+                    displayed_link=article.get("displayed_link"),
+                    favicon=article.get("favicon")
                 )
                 for article in articles[:limit]
             ]
+
         except requests.RequestException as e:
-            logger.error(f"Error fetching news: {str(e)}", exc_info=True)
+            logger.error(f"Error fetching news: {e}")
             return []
 
 class WeatherService:
@@ -124,7 +134,7 @@ class BaseNewsAgent(Agent):
             return "No se encontraron noticias."
             
         return "\n\n".join(
-            f"**{article.title}**\n{article.snippet}\n*Fuente: {article.source}*"
+            f"**{article.title}**\n{article.snippet}\n*Fuente: {article.source}**Link: {article.link}*"
             for article in articles
         )
 
