@@ -9,8 +9,8 @@ emissions_by_region = pd.read_csv('annual-co-emissions-by-region.csv')
 
 # Filter the datasets for the years 1970-2020
 emissions_per_capita = emissions_per_capita[
-    (emissions_per_capita['Year'] >= 1970) & (emissions_per_capita['Year'] <= 2020)]
-emissions_by_region = emissions_by_region[(emissions_by_region['Year'] >= 1970) & (emissions_by_region['Year'] <= 2020)]
+    (emissions_per_capita['Year'] >= 1970) & (emissions_per_capita['Year'] <= 2022)]
+emissions_by_region = emissions_by_region[(emissions_by_region['Year'] >= 1970) & (emissions_by_region['Year'] <= 2022)]
 
 # Ensure only countries with a 3-letter ISO code are used
 emissions_per_capita = emissions_per_capita[emissions_per_capita['Code'].str.len() == 3]
@@ -31,7 +31,7 @@ app = Dash(__name__)
 app.layout = html.Div([
     dcc.Dropdown(
         id='year-selector',
-        options=[{'label': year, 'value': year} for year in range(1970, 2021)],
+        options=[{'label': year, 'value': year} for year in range(1970, 2022)],
         value=1970,
         clearable=False
     ),
@@ -65,11 +65,11 @@ def update_map(selected_year):
 def update_charts(selected_year):
     # Stacked Area Chart for total emissions
     fig_area = px.area(emissions_by_region_top_10, x="Year", y="Annual CO₂ emissions",
-                       color="Entity", title="Total CO₂ Emissions of Top 10 Countries (1970-2020)")
+                       color="Entity", title="Total CO₂ Emissions of Top 10 Countries (1970-2022)")
 
     # Line Chart for per-capita emissions
     fig_line = px.line(emissions_per_capita_top_10, x="Year", y="Annual CO₂ emissions (per capita)",
-                       color="Entity", title="Per-Capita CO₂ Emissions of Top 10 Countries (1970-2020)")
+                       color="Entity", title="Per-Capita CO₂ Emissions of Top 10 Countries (1970-2022)")
 
     return fig_area, fig_line
 
