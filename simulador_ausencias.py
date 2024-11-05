@@ -3,7 +3,6 @@ import random
 from transformers import pipeline
 from dotenv import load_dotenv
 import os
-# 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
 # Cargar las variables de entorno
 load_dotenv()
 
@@ -21,7 +20,7 @@ telefonos_medicos = ["+34900000001", "+34900000002", "+34900000003"]
 
 # Función para enviar mensajes a través de CallmeBot
 def enviar_mensaje(telefono, mensaje):
-    apikey = os.getenv("CALLMEBOT_API_KEY", "9295095")
+    apikey = os.getenv("CALLMEBOT_API_KEY", "")
     url = f"https://api.callmebot.com/whatsapp.php?phone={telefono}&text={mensaje}&apikey={apikey}"
     requests.get(url)
 
