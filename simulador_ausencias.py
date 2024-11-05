@@ -1,88 +1,79 @@
+from openai import OpenAI
 import requests
 import random
-from transformers import pipeline
 from dotenv import load_dotenv
 import os
-# Cargar las variables de entorno
+
+# Load environment variables (make sure your OpenAI API key is set in the .env file)
 load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Configuración del modelo de lenguaje
-nlp = pipeline("text-generation", model="tiiuae/falcon-7b-instruct")
-
-# Datos simulados de ausencias
-ausentes = {
-    "Juan Pérez": {"tutor": "+34667519829", "motivo": "desconocido"},
-    "María García": {"tutor": "+34667519829", "motivo": "desconocido"}
+# Simulated data. The messsage will be sent to the tutor's phone number
+absent_students = {
+    "Juan Pérez": {"tutor": "+34667519829", "reason": "unknown"},
+    "María García": {"tutor": "+34667519829", "reason": "unknown"}
 }
 
-# Lista de teléfonos de médicos
-telefonos_medicos = ["+34900000001", "+34900000002", "+34900000003"]
+medical_phone_numbers = ["+34900000001", "+34900000002", "+34900000003"]
 
-# Función para enviar mensajes a través de CallmeBot
-def enviar_mensaje(telefono, mensaje):
-    apikey = os.getenv("CALLMEBOT_API_KEY", "")
-    url = f"https://api.callmebot.com/whatsapp.php?phone={telefono}&text={mensaje}&apikey={apikey}"
+# Function to send messages via CallmeBot
+def send_message(phone, message):
+    apikey = os.getenv("CALLMEBOT_API_KEY")
+    url = f"https://api.callmebot.com/whatsapp.php?phone={phone}&text={message}&apikey={apikey}"
+    print(f"Sending message to {phone}: {message}")  # Verbose message
     requests.get(url)
 
-# Función para generar respuestas usando el modelo de lenguaje
-def generar_respuesta(prompt, max_length=100):
-    try:
-        respuesta = nlp(prompt, max_length=max_length, num_return_sequences=1)[0]['generated_text']
-        return respuesta.split(prompt)[1].strip()
-    except Exception as e:
-        print(f"Error generando respuesta: {e}")
-        return "Error generando respuesta."
+# Function to generate responses using GPT-4 from OpenAI
+def generate_response(prompt):
+    print(f"\nPrompt sent to GPT-4:\n{prompt}")  # Print prompt for tracking
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are a cordial but firm assistant communicating with tutors about student absenteeism."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=100
+    )
+    response_text = response.choices[0].message.content.strip()
+    print(f"Response from GPT-4:\n{response_text}\n")  # Print received response
+    return response_text
 
-# Función principal del chatbot
-def chatbot_absentismo():
-    for estudiante, info in ausentes.items():
-        # Generar saludo e informar de la ausencia
-        prompt = (f"Eres un asistente del centro educativo y contactas de manera formal y cordial. "
-                  f"Dirígete al tutor de {estudiante} e informa de su ausencia a clase hoy. "
-                  f"Invítalo a proporcionar un motivo específico si lo conoce.")
-        saludo = generar_respuesta(prompt)
-        enviar_mensaje(info['tutor'], saludo)
+# Main chatbot function. This is a simulation of the chatbot's behavior. It's not a real chatbot, but it simulates the conversation.
+# In the real world, i should have a template for the messages and a way to store the messages in a database.
+# I will try to guide the tutors asking them about the real reason for the absence. Right now, they are all sick, so they
+# have to go to the hospital.
+def absenteeism_chatbot():
+    for student, info in absent_students.items():
+        # Initial greeting
+        prompt = f"Greet the tutor of {student} and inform them about the student's absence in a polite but firm manner."
+        greeting = generate_response(prompt)
+        send_message(info['tutor'], greeting)
 
-        # Preguntar motivo de ausencia
-        prompt = f"Pregunta cordialmente al tutor si conoce el motivo específico de la ausencia de {estudiante}:"
-        pregunta_motivo = generar_respuesta(prompt)
-        enviar_mensaje(info['tutor'], pregunta_motivo)
+        # Ask about the reason for the absence
+        prompt = f"Ask the tutor if they know the reason for {student}'s absence."
+        reason_question = generate_response(prompt)
+        send_message(info['tutor'], reason_question)
 
-        # Simulación de respuesta del tutor para pruebas
-        respuesta_tutor = random.choice(["No lo sé", "Está enfermo", "Tenía una cita médica", "Asunto personal"])
+        # Simulate tutor's response for testing
+        tutor_response = random.choice(["I don't know", "They are sick", "They had a medical appointment"])
+        print(f"Tutor's simulated response: {tutor_response}")  # Print simulated response
 
-        if respuesta_tutor == "No lo sé":
-            prompt = (f"El tutor no sabe la razón de la ausencia de {estudiante}. "
-                      f"Responde de forma respetuosa sugiriendo que programe una reunión con el centro para discutir el apoyo necesario.")
-            sugerencia = generar_respuesta(prompt)
-            enviar_mensaje(info['tutor'], sugerencia)
+        # Generate suggestion or recommendation based on tutor's response
+        if tutor_response == "I don't know":
+            prompt = f"The tutor does not know why {student} is absent. Suggest scheduling a meeting to seriously discuss absenteeism."
+            suggestion = generate_response(prompt)
+            send_message(info['tutor'], suggestion)
+        elif tutor_response in ["They are sick", "They had a medical appointment"]:
+            prompt = f"{student} is sick. Recommend visiting a doctor and provide contact phone numbers if necessary."
+            recommendation = generate_response(prompt)
+            phone_numbers = ", ".join(medical_phone_numbers)
+            send_message(info['tutor'], f"{recommendation}\nMedical contacts: {phone_numbers}")
 
-        elif respuesta_tutor == "Está enfermo":
-            prompt = (f"El tutor indica que {estudiante} está enfermo. "
-                      f"Responde de manera empática, sugiriendo que el tutor considere una revisión médica si es necesario. "
-                      f"Proporciona números de contacto de profesionales médicos de confianza.")
-            recomendacion = generar_respuesta(prompt)
-            numeros = ", ".join(telefonos_medicos)
-            enviar_mensaje(info['tutor'], f"{recomendacion}\nNúmeros de médicos: {numeros}")
+        # Farewell
+        prompt = f"Say goodbye to {student}'s tutor professionally and offer additional help if needed."
+        farewell = generate_response(prompt)
+        send_message(info['tutor'], farewell)
 
-        elif respuesta_tutor == "Tenía una cita médica":
-            prompt = (f"El tutor indica que {estudiante} tenía una cita médica. "
-                      f"Agradece la información y ofrece al tutor la posibilidad de solicitar apoyo en temas escolares, si necesario.")
-            agradecimiento = generar_respuesta(prompt)
-            enviar_mensaje(info['tutor'], agradecimiento)
-
-        elif respuesta_tutor == "Asunto personal":
-            prompt = (f"El tutor menciona que la ausencia de {estudiante} es por un asunto personal. "
-                      f"Responde de manera comprensiva y ofrece la posibilidad de coordinar cualquier asistencia escolar adicional si fuera necesaria.")
-            respuesta_asunto_personal = generar_respuesta(prompt)
-            enviar_mensaje(info['tutor'], respuesta_asunto_personal)
-
-        # Despedida cordial y oferta de ayuda adicional
-        prompt = (f"Despídete cordialmente del tutor de {estudiante}, "
-                  f"reiterando la disposición del centro a ofrecer apoyo en caso de necesitar ayuda adicional.")
-        despedida = generar_respuesta(prompt)
-        enviar_mensaje(info['tutor'], despedida)
-
-# Ejecutar el chatbot
+# Run the chatbot
 if __name__ == "__main__":
-    chatbot_absentismo()
+    absenteeism_chatbot()
